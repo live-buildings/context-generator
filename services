@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -e
+
+if (( $# < 1 )); then
+    echo "Illegal number of parameters"
+    echo "usage: services [create|markdown|ngsi|jsonld|full]"
+    exit 1
+fi
+
+command="$1"
+file="swaggerIdeal.yaml"
+if (( $# == 2 )); then
+    file="$2"
+fi
+
+case "${command}" in
+	"help")
+        echo "usage: services [create|markdown|ngsi|jsonld|full]"
+        ;;
+	"create")
+		export $(cat .env | grep "#" -v)
+		 docker build -t contextgen ./context-file-generator   
+		;;
+	"markdown")
+		echo "Creating Documentation for the Data Models"
+		mkdir -p results
+		docker run --rm -v $(pwd)/:/files contextgen markdown -i "/files/${file}" > results/datamodels.md
+		;;
+	"ngsi")
+		echo "Validating entry file then creating a NGSI-LD @context file for normalized interactions"
+		mkdir -p results
+		docker run --rm -v $(pwd)/:/files contextgen ngsi -i "/files/${file}" > results/datamodels.context-ngsi.jsonld
+		;;
+	"jsonld")
+		echo "Creating a JSON-LD @context file for key-values interactions"
+		mkdir -p results
+		docker run --rm -v $(pwd)/:/files contextgen jsonld -i "/files/${file}" > results/datamodels.context.jsonld
+		;;
+  "full")
+  		export $(cat .env | grep "#" -v)
+  		docker build -t contextgen ./context-file-generator
+  		./services markdown $2
+  		./services ngsi $2
+  		./services jsonld $2
+  		;;
+	"stop")
+		export $(cat .env | grep "#" -v)
+		echo "no services running."
+		;;
+	*)
+		echo "Command not Found."
+		echo "usage: services [create|markdown|ngsi|jsonld|full]"
+		exit 127;
+		;;
+esac
