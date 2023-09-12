@@ -9,7 +9,7 @@ if (( $# < 1 )); then
 fi
 
 command="$1"
-file="swaggerIdeal.yaml"
+file="swagger.yaml"
 if (( $# == 2 )); then
     file="$2"
 fi

@@ -1,5 +1,5 @@
 // Liste de contextes
-const commonContexts = [ // 0.0.3 - Tous les contextes ont été commentés pour avoir les hyperliens
+const commonContexts = [
   /*
   { key: 'ngsi-ld',           url: 'https://uri.etsi.org/ngsi-ld/' },
   { key: 'fiware',            url: 'https://uri.fiware.org/ns/data-models#' },
@@ -108,7 +108,6 @@ function getContext(api, context, expand) {
     const uri = ngsi['uri'] || '';
     const uriPrefix = ngsi['uri-prefix'] || '';
 
-    // 0.0.3 - Correction du shortUri des schemas en cas de non-possession de l'URI
     const shortUri = uri ? replaceCommonContextURLs(uri) : uriPrefix ? replaceCommonContextURLs(uriPrefix) + obj : 'undefined';
 
     text.push(`"${obj}": "${shortUri}"`);
@@ -146,7 +145,7 @@ function getContext(api, context, expand) {
 
   return { '@context':
         [context, 'https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld']
-  }; // 0.0.3 - Transformation du contexte en liste et ajout en dur de l'uri
+  };
 }
 
 /**

@@ -2,7 +2,7 @@
   "name": "datamodelgen",
   "license": "MIT",
   "description": "Reader for Swagger Models",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "main": "bin/app.js",
   "bin": {
     "datamodelgen": "bin/app.js"
