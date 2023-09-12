@@ -220,10 +220,13 @@ function addGraph(api, context) {
 
   function processSchemaRDF(obj, schema, ngsi) {
     if (!schema.enum) {
-      const shortUri = ngsi['uri-prefix'] ? replaceCommonContextURLs(ngsi['uri-prefix']) : '';
+      const uri = ngsi['uri'] || '';
+      const uriPrefix = ngsi['uri-prefix'] || '';
+
+      const shortUri = uri ? replaceCommonContextURLs(uri) : uriPrefix ? replaceCommonContextURLs(uriPrefix) + obj : 'undefined';
 
       graph.push({
-        '@id': shortUri + obj,
+        '@id': shortUri,
         '@type': 'rdfs:Class',
         'rdfs:comment': [
           {
@@ -246,14 +249,16 @@ function addGraph(api, context) {
     if (schema.properties) {
       Object.keys(schema.properties).forEach(key => {
         const value = schema.properties[key];
-        const ngsi = value['x-ngsi'] || {};
+        const uri = ngsi['uri'] || '';
+        const uriPrefix = ngsi['uri-prefix'] || '';
+
         const type = ngsi.type || 'Property';
 
         if (!value.enum) {
-          const shortUri = ngsi['uri-prefix'] ? replaceCommonContextURLs(ngsi['uri-prefix']) : '';
+          const shortUri = uri ? replaceCommonContextURLs(uri) : uriPrefix ? replaceCommonContextURLs(uriPrefix) + key : 'undefined';
 
           graph.push({
-            '@id': shortUri + key,
+            '@id': shortUri,
             '@type': 'ngsi-ld:' + type,
             'rdfs:comment': [
               {
