@@ -4,53 +4,75 @@ set -e
 
 if (( $# < 1 )); then
     echo "Illegal number of parameters"
-    echo "usage: services [create|markdown|ngsi|jsonld|full]"
+    echo "usage: services [create|markdown|simpler|ngsi|jsonld|full] [fileName] [inputFolderAbsolutePath] [outputFolderAbsolutePath]"
     exit 1
 fi
 
 command="$1"
 file="swagger.yaml"
-if (( $# == 2 )); then
+if (( $# >= 2 )); then
     file="$2"
+fi
+
+inputFolder="$(pwd)/swaggers"
+if (( $# >= 3 )); then
+    inputFolder="$3"
+fi
+
+outputFolder="$(pwd)/results"
+if (( $# == 4 )); then
+    outputFolder="$4"
 fi
 
 case "${command}" in
 	"help")
-        echo "usage: services [create|markdown|ngsi|jsonld|full]"
-        ;;
+    echo "usage: services [create|markdown|simpler|ngsi|jsonld|full] [fileName] [inputFolderAbsolutePath] [outputFolderAbsolutePath]"
+    ;;
 	"create")
-		export $(cat .env | grep "#" -v)
-		 docker build -t contextgen ./context-file-generator   
+	  export $(cat .env | grep "#" -v)
+    docker build -t contextgen ./context-file-generator
 		;;
 	"markdown")
 		echo "Creating Documentation for the Data Models"
-		mkdir -p results
-		docker run --rm -v $(pwd)/:/files contextgen markdown -i "/files/${file}" > results/datamodels.md
+		mkdir -p "${outputFolder}"
+		resultsFolder="${outputFolder}"
+		outputFileName="datamodels.md"
+		docker run --rm -v "${inputFolder}"/"${file}":"/${file}" contextgen markdown -f "/${file}" > "${resultsFolder}"/"${outputFileName}"
 		;;
 	"ngsi")
 		echo "Validating entry file then creating a NGSI-LD @context file for normalized interactions"
-		mkdir -p results
-		docker run --rm -v $(pwd)/:/files contextgen ngsi -i "/files/${file}" > results/datamodels.context-ngsi.jsonld
+		mkdir -p "${outputFolder}"
+    resultsFolder="${outputFolder}"
+		outputFileName="context-ngsi-full.jsonld"
+		docker run --rm -v "${inputFolder}"/"${file}":"/${file}" contextgen ngsi -f "/${file}" > "${resultsFolder}"/"${outputFileName}"
+		;;
+  "simpler")
+		echo "Validating entry file then creating a NGSI-LD @context file for Mintaka"
+		mkdir -p "${outputFolder}"
+    resultsFolder="${outputFolder}"
+		outputFileName="context-ngsi.jsonld"
+		docker run --rm -v "${inputFolder}"/"${file}":"/${file}" contextgen simpler -f "/${file}" > "${resultsFolder}"/"${outputFileName}"
 		;;
 	"jsonld")
 		echo "Creating a JSON-LD @context file for key-values interactions"
-		mkdir -p results
-		docker run --rm -v $(pwd)/:/files contextgen jsonld -i "/files/${file}" > results/datamodels.context.jsonld
+		mkdir -p "${outputFolder}"
+    resultsFolder="${outputFolder}"
+		outputFileName="context.jsonld"
+		docker run --rm -v "${inputFolder}"/"${file}":"/${file}" contextgen jsonld -f "/${file}" > "${resultsFolder}"/"${outputFileName}"
 		;;
   "full")
-  		export $(cat .env | grep "#" -v)
-  		docker build -t contextgen ./context-file-generator
-  		./services markdown $2
-  		./services ngsi $2
-  		./services jsonld $2
+    ./services create
+    ./services markdown $2 $3 $4
+    ./services ngsi $2 $3 $4
+    ./services simpler $2 $3 $4
+    ./services jsonld $2 $3 $4
   		;;
 	"stop")
-		export $(cat .env | grep "#" -v)
 		echo "no services running."
 		;;
 	*)
 		echo "Command not Found."
-		echo "usage: services [create|markdown|ngsi|jsonld|full]"
+    echo "usage: services [create|markdown|simpler|ngsi|jsonld|full] [fileName] [inputFolderAbsolutePath] [outputFolderAbsolutePath]"
 		exit 127;
 		;;
 esac

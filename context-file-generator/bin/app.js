@@ -4,10 +4,11 @@ const yargs = require('yargs')
   .usage('$0 command')
   .command('ngsi', 'output NGSILD context')
   .command('jsonld', 'output JSONLD context with @graph')
+  .command('simpler', 'output NGSILD context for Mintaka')
   .command('markdown', 'output Markdown')
   .demandCommand(1, 'must provide a valid command')
-  .demandOption(['i'])
-  .alias('i', 'file')
+  .demandOption(['f'])
+  .alias('f', 'file')
   .alias('l', 'lang');
 
 const argv = yargs.argv;
@@ -19,6 +20,9 @@ switch (command) {
     break;
   case 'ngsi':
     swagger.ngsi(argv.file);
+    break;
+  case 'simpler':
+    swagger.simpler(argv.file);
     break;
   case 'jsonld':
     swagger.jsonld(argv.file, argv.lang || 'en');
