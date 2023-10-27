@@ -100,7 +100,7 @@ function addEntry(text, type, key, uri, value, expand) {
 function getContext(api, context, expand) {
   const text = []; // Tableau pour stocker les définitions de contexte
 
-  // Parcour des schemas de l'api
+  // Parcours des schemas de l'api
   Object.keys(api.components.schemas).forEach(obj => {
     const schema = api.components.schemas[obj];
     const ngsi = schema['x-ngsi'] || {};
@@ -143,9 +143,27 @@ function getContext(api, context, expand) {
     console.error("/!\\ Followed properties have an undefined uri AND an undefined prefixUri, be careful :\n    ", undefinedEntries.join(', '));
   }
 
+  return context ;
+}
+
+/**
+ * Encapsule le contexte simplifié (pour Mintaka)
+ * @param simpleContext contexte non encapsulé
+ * @returns {{"@context"}} contexte encapsulé
+ */
+function getSimpleContext(simpleContext) {
+  return { '@context': simpleContext };
+}
+
+/**
+ * Encapsule le contexte en full
+ * @param simpleContext contexte non encapsulé
+ * @returns {{"@context": (*|string)[]}} contexte encapsulé
+ */
+function getFullContext(simpleContext) {
   return { '@context':
-        [context, 'https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld']
-  };
+          [simpleContext, 'https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld']
+    };
 }
 
 /**
@@ -293,4 +311,6 @@ function addGraph(api, context) {
 exports.addCommonContextURLs = addCommonContextURLs;
 exports.addCommonGraphURLs = addCommonGraphURLs;
 exports.getContext = getContext;
+exports.getSimpleContext = getSimpleContext;
+exports.getFullContext = getFullContext;
 exports.addGraph = addGraph;

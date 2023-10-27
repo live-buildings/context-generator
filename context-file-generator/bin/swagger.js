@@ -37,7 +37,19 @@ async function ngsi(input, _) {
     JSONLD.addCommonContextURLs(context);
     await dereferenceYaml(input);
 
-    console.log(JSON.stringify(JSONLD.getContext(api, context, false), null, 4));
+    console.log(JSON.stringify(JSONLD.getFullContext(JSONLD.getContext(api, context, false)), null, 4));
+  } catch (err) {
+    console.error('Onoes! The API is invalid. ' + err.message);
+  }
+}
+
+async function simpler(input, _) {
+  try {
+    await SwaggerParser.validate(input);
+    JSONLD.addCommonContextURLs(context);
+    await dereferenceYaml(input);
+
+    console.log(JSON.stringify(JSONLD.getSimpleContext(JSONLD.getContext(api, context, false)), null, 4));
   } catch (err) {
     console.error('Onoes! The API is invalid. ' + err.message);
   }
@@ -52,7 +64,7 @@ async function jsonld(input, _) {
 
     await dereferenceYaml(input);
 
-    console.log(JSON.stringify(JSONLD.addGraph(api, JSONLD.getContext(api, context, true)), null, 4));
+    console.log(JSON.stringify(JSONLD.addGraph(api, JSONLD.getFullContext(JSONLD.getContext(api, context, true))), null, 4));
   } catch (err) {
     console.error('Onoes! The API is invalid. ' + err.message);
   }
@@ -60,4 +72,5 @@ async function jsonld(input, _) {
 
 exports.markdown = markdown;
 exports.jsonld = jsonld;
+exports.simpler = simpler;
 exports.ngsi = ngsi;
